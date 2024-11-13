@@ -1,0 +1,98 @@
+# Classe principale Capteur
+class Capteur:
+    def __init__(self, nom, unite):
+        self.nom = nom
+        self.unite = unite
+
+    def lire_valeur(self):
+        raise NotImplementedError("Cette méthode doit être surchargée.")
+
+# Classe pour les capteurs avec des valeurs continues, influencés par des variables extérieures
+class CapteurContinu(Capteur):
+    def __init__(self, nom, unite, min_valeur, max_valeur, facteur_influence=1.0):
+        super().__init__(nom, unite)
+        self.min_valeur = min_valeur
+        self.max_valeur = max_valeur
+        self.facteur_influence = facteur_influence  # Influence des variables de pilotage (débit d'huile, vitesse)
+
+    def lire_valeur(self, influenceur=1.0):
+        # La valeur est influencée par le paramètre d'influence
+        valeur = influenceur * self.facteur_influence
+        return round(min(max(valeur, self.min_valeur), self.max_valeur), 2)
+
+# Classe pour les capteurs TOR (Tout Ou Rien)
+class CapteurTOR(Capteur):
+    def __init__(self, nom):
+        super().__init__(nom, "TOR")
+
+    def lire_valeur(self):
+        # Retourner simplement un état True/False
+        return True
+
+# Les deux variables manuelles pilotant le reste des capteurs
+class VitesseRotation(CapteurContinu):
+    def __init__(self):
+        super().__init__("Vitesse de rotation tarière", "tr/min", 0, 1000)
+
+class DebitHuile(CapteurContinu):
+    def __init__(self):
+        super().__init__("Débit d'huile", "m3/s", 0, 0.02)
+
+# Fonction pour gérer la simulation des capteurs
+def simuler_capteurs(vitesse_rotation, debit_huile):
+    capteurs = [
+        CapteurContinu("Vitesse de la prise de force", "tr/min", 0, 540, facteur_influence=0.5),
+        CapteurContinu("Pression d'huile", "Bar", 0, 250, facteur_influence=debit_huile * 25000),  # Lié au débit d'huile
+        CapteurContinu("Compte tour de roue pour espacement piquets", "tr", 0, 1000, facteur_influence=0.8),
+        CapteurContinu("Présence de piquets dans le guide", "Unité", 0, 50),
+        CapteurContinu("Compteur de piquets quand chargement", "Unité", 0, 100),
+        CapteurContinu("Gyroscope/Accéléromètre", "°", -90, 90),
+        CapteurTOR("Fin de course pour guide"),
+        CapteurTOR("Fin de course pour tarrière Z/X"),
+        CapteurContinu("Vitesse rotation tarière", "tr/min", 0, 1000, facteur_influence=vitesse_rotation),
+        CapteurContinu("Vitesse enfoncement tarière (pression)", "N", 0, 10000, facteur_influence=vitesse_rotation * 8),
+        CapteurContinu("Jauge dans le guide pour enfoncement", "cm", 0, 200, facteur_influence=vitesse_rotation * 0.5),
+        CapteurContinu("Pression sangle trémie", "Bar", 0, 10, facteur_influence=debit_huile * 500),
+        CapteurContinu("Jauge capacité trémie", "%", 0, 100)
+    ]
+
+    # Affichage des résultats
+    print(f"Vitesse de rotation actuelle : {vitesse_rotation} tr/min")
+    print(f"Débit d'huile actuel : {debit_huile} m3/s")
+    for capteur in capteurs:
+        if isinstance(capteur, CapteurTOR):
+            valeur = capteur.lire_valeur()  # Pas de paramètre 'influenceur' pour les capteurs TOR
+        else:
+            valeur = capteur.lire_valeur(influenceur=1.0)  # Piloter par les variables influentes
+        print(f"{capteur.nom} : {valeur} {capteur.unite}")
+
+# Fonction pour ajuster manuellement les deux variables principales
+def ajuster_pilotage():
+    try:
+        vitesse_rotation = float(input("Entrez la vitesse de rotation tarière (tr/min) : "))
+        debit_huile = float(input("Entrez le débit d'huile (m3/s) : "))
+    except ValueError:
+        print("Erreur : veuillez entrer des valeurs numériques valides.")
+        return ajuster_pilotage()
+    
+    # Limiter les valeurs dans les plages acceptables
+    vitesse_rotation = max(0, min(vitesse_rotation, 1000))
+    debit_huile = max(0, min(debit_huile, 100))
+    
+    return vitesse_rotation, debit_huile
+
+# Exécution de la simulation
+if __name__ == "__main__":
+    print("Simulation des capteurs basée sur la vitesse de rotation et le débit d'huile.")
+    
+    while True:
+        # Ajuster manuellement les variables de contrôle
+        vitesse_rotation, debit_huile = ajuster_pilotage()
+        
+        # Simuler et afficher les résultats
+        simuler_capteurs(vitesse_rotation, debit_huile)
+
+        # Sortie de la simulation
+        continuer = input("Voulez-vous continuer la simulation ? (o/n) : ").lower()
+        if continuer != 'o':
+            break
