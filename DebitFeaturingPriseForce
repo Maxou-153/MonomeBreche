@@ -1,0 +1,145 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider, Button
+import time
+
+# Classe pour le capteur de débit d'huile
+class CapteurDebitHuile:
+    def __init__(self, impulsions_par_litre=450, precision=0.01, debit_min=1, debit_max=100):
+        self.impulsions_par_litre = impulsions_par_litre
+        self.precision = precision
+        self.debit_min = debit_min
+        self.debit_max = debit_max
+        self.base_debit = (debit_min + debit_max) / 2  # Valeur de base
+
+    def calculer_debit(self, ajustement):
+        return np.clip(self.base_debit + ajustement, self.debit_min, self.debit_max)
+
+# Classe pour le capteur de régime moteur (PTO)
+class CapteurPTO:
+    def __init__(self, rpm_initial=2000):
+        self.rpm = rpm_initial
+        self.default_rpm = rpm_initial  # RPM par défaut
+
+    def set_rpm(self, rpm):
+        self.rpm = rpm
+
+    def get_rpm(self):
+        return self.rpm
+
+    def reset(self):
+        self.rpm = self.default_rpm
+
+# Fonction pour changer le mode du capteur PTO
+def change_mode(mode):
+    if mode == 1:
+        sensor_pto.set_rpm(np.random.uniform(1500, 1800))
+    elif mode == 2:
+        sensor_pto.set_rpm(np.random.uniform(1800, 2100))
+    elif mode == 3:
+        sensor_pto.set_rpm(np.random.uniform(2100, 2400))
+    elif mode == 4:
+        sensor_pto.set_rpm(np.random.uniform(2400, 2500))
+
+# Fonction pour réinitialiser la prise de force
+def reset_pto(event):
+    sensor_pto.reset()
+
+# Fonction de mise à jour du graphique
+def update_graph(rpm_history, debit_history, time_history, current_time, vitesse_balayage):
+    # Mise à jour du graphique PTO
+    line_rpm.set_data(time_history, rpm_history)
+    ax_rpm.set_xlim(max(0, current_time - vitesse_balayage), current_time + 1)
+    ax_rpm.set_ylim(min(rpm_history) - 100, max(rpm_history) + 100)
+
+    # Mise à jour du graphique Débit
+    line_debit.set_data(time_history, debit_history)
+    ax_debit.set_xlim(max(0, current_time - vitesse_balayage), current_time + 1)
+    ax_debit.set_ylim(min(debit_history) - 10, max(debit_history) + 10)
+
+    # Rafraîchissement des graphiques
+    fig.canvas.draw_idle()
+    plt.pause(0.05)
+
+# Fonction de simulation pour les deux capteurs
+def simulate_sensors():
+    rpm_history = []
+    debit_history = []
+    time_history = []
+    simulated_time = 0
+
+    while True:  # Simulation continue
+        # Débit d'huile ajusté par le curseur
+        ajustement_debit = slider_debit.val
+        debit_mesure = capteur_debit.calculer_debit(ajustement_debit)
+
+        # Régime moteur
+        rpm = sensor_pto.get_rpm()
+
+        # Historique
+        rpm_history.append(rpm)
+        debit_history.append(debit_mesure)
+        time_history.append(simulated_time)
+
+        # Mise à jour des graphiques
+        update_graph(rpm_history, debit_history, time_history, simulated_time, slider_balayage.val)
+
+        simulated_time += 0.1  # Temps simulé avec incrément
+        time.sleep(0.1)
+
+# Initialisation des capteurs
+capteur_debit = CapteurDebitHuile()
+sensor_pto = CapteurPTO(rpm_initial=2000)
+
+# Création de la figure et des axes pour les graphiques
+plt.ion()
+fig, (ax_rpm, ax_debit) = plt.subplots(2, 1, figsize=(10, 8))
+plt.subplots_adjust(bottom=0.35)
+
+# Graphique du régime moteur (PTO)
+line_rpm, = ax_rpm.plot([], [], label='Régime moteur (RPM)', color='blue')
+ax_rpm.set_title('Simulation du Régime Moteur (PTO)')
+ax_rpm.set_ylabel('RPM')
+ax_rpm.grid(True)
+ax_rpm.legend()
+
+# Graphique du débit d'huile
+line_debit, = ax_debit.plot([], [], label='Débit d\'huile (L/min)', color='green')
+ax_debit.set_title('Simulation du Débit d\'huile')
+ax_debit.set_xlabel('Temps (s)')
+ax_debit.set_ylabel('L/min')
+ax_debit.grid(True)
+ax_debit.legend()
+
+# Curseur pour ajuster l'allure du débit d'huile
+ax_debit_slider = plt.axes([0.2, 0.2, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+slider_debit = Slider(ax_debit_slider, 'Ajust. Débit (L/min)', -50, 50, valinit=5)
+
+# Curseur pour ajuster la vitesse de balayage
+ax_balayage_slider = plt.axes([0.2, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+slider_balayage = Slider(ax_balayage_slider, 'Balayage (s)', 5, 30, valinit=5)
+
+# Boutons pour changer le mode du capteur PTO
+axmode1 = plt.axes([0.1, 0.05, 0.1, 0.075])
+button_mode1 = Button(axmode1, 'Mode 1')
+button_mode1.on_clicked(lambda event: change_mode(1))
+
+axmode2 = plt.axes([0.25, 0.05, 0.1, 0.075])
+button_mode2 = Button(axmode2, 'Mode 2')
+button_mode2.on_clicked(lambda event: change_mode(2))
+
+axmode3 = plt.axes([0.4, 0.05, 0.1, 0.075])
+button_mode3 = Button(axmode3, 'Mode 3')
+button_mode3.on_clicked(lambda event: change_mode(3))
+
+axmode4 = plt.axes([0.55, 0.05, 0.1, 0.075])
+button_mode4 = Button(axmode4, 'Mode 4')
+button_mode4.on_clicked(lambda event: change_mode(4))
+
+# Bouton pour réinitialiser la prise de force
+ax_reset = plt.axes([0.7, 0.05, 0.1, 0.075])
+button_reset = Button(ax_reset, 'Init')
+button_reset.on_clicked(reset_pto)
+
+# Lancer la simulation
+simulate_sensors()
