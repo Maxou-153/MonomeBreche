@@ -414,7 +414,7 @@
           <mxGeometry y="340" width="160" height="28" as="geometry" />
         </mxCell>
         <mxCell id="9PGojZ2IDabCklF1MC3D-57" value="Statistics" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="110" y="910" width="160" height="160" as="geometry">
+          <mxGeometry x="110" y="910" width="160" height="230" as="geometry">
             <mxRectangle x="230" y="140" width="160" height="26" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -432,6 +432,15 @@
         </mxCell>
         <mxCell id="9PGojZ2IDabCklF1MC3D-62" value="TimePlayed" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="9PGojZ2IDabCklF1MC3D-57">
           <mxGeometry y="130" width="160" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="9PGojZ2IDabCklF1MC3D-171" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="9PGojZ2IDabCklF1MC3D-57">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint y="156" as="sourcePoint" />
+            <mxPoint x="160" y="156" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="9PGojZ2IDabCklF1MC3D-172" value="Get_" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="9PGojZ2IDabCklF1MC3D-57">
+          <mxGeometry y="156" width="160" height="28" as="geometry" />
         </mxCell>
         <mxCell id="9PGojZ2IDabCklF1MC3D-114" value="Ranking" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="1410" y="750" width="160" height="390" as="geometry">
