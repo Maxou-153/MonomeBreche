@@ -7,9 +7,8 @@ import time
 # Paramètres de la simulation
 diametre_roue = 0.6  # Diamètre de la roue en mètres
 circumference_roue = np.pi * diametre_roue  # Circonférence en mètres
-tours_cible = 2.65  # Nombre de tours pour parcourir 5 mètres
-distance_par_piquet = 5  # Distance entre piquets en mètres
 vitesse_m_s = 1  # Vitesse initiale de déplacement en m/s
+distance_par_piquet = 5  # Distance initiale entre piquets en mètres
 
 # État du compteur
 distance_parcourue = 0  # Distance totale parcourue
@@ -21,17 +20,16 @@ start_time = time.time()  # Chronomètre pour la latence
 # Fonction pour mettre à jour le compteur de piquets
 def update_compteur(distance_parcourue, distance_par_piquet):
     global piquet_pose, compteur_piquets
-    if distance_parcourue >= distance_par_piquet:  # Si la distance parcourue dépasse la distance entre piquets
+    while distance_parcourue >= distance_par_piquet:  # Vérifier si plusieurs piquets doivent être posés
         piquet_pose = True
         compteur_piquets += 1  # Incrémenter le compteur de piquets
         distance_parcourue -= distance_par_piquet  # Réinitialiser la distance parcourue
-    else:
-        piquet_pose = False
+    piquet_pose = False
     return distance_parcourue
 
 # Création de l'interface graphique
 fig, ax = plt.subplots(figsize=(6, 6))
-plt.subplots_adjust(bottom=0.25)  # Laisser de l'espace pour le curseur
+plt.subplots_adjust(bottom=0.35)  # Laisser de l'espace pour les curseurs
 ax.axis("equal")  # Maintenir les proportions égales
 ax.set_xlim(-1.5, 1.5)
 ax.set_ylim(-1.5, 1.5)
@@ -44,55 +42,52 @@ ax.add_artist(roue)
 # Barre de progression
 progress, = ax.plot([], [], color="green", linewidth=3)
 
-# Texte pour le compteur
-text_piquet = ax.text(0, -1.0, "", fontsize=14, ha="center", color="red", fontweight='bold')
-text_piquets_total = ax.text(0, -1.2, "", fontsize=14, ha="center", color="black", fontweight='bold')
+# Texte pour le compteur avec fond blanc
+text_piquet = ax.text(0, -1.0, "", fontsize=14, ha="center", color="red", fontweight='bold', bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.3'))
+text_piquets_total = ax.text(0, -1.2, "", fontsize=14, ha="center", color="black", fontweight='bold', bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.3'))
 
-# Création du curseur pour ajuster la vitesse
-ax_vitesse = plt.axes([0.2, 0.1, 0.6, 0.03], facecolor="lightgoldenrodyellow")
+# Curseur pour ajuster la vitesse
+ax_vitesse = plt.axes([0.2, 0.15, 0.6, 0.03], facecolor="lightgoldenrodyellow")
 slider_vitesse = Slider(ax_vitesse, "Vitesse (m/s)", 0, 7, valinit=vitesse_m_s)
+
+# Curseur pour ajuster la distance entre piquets
+ax_distance = plt.axes([0.2, 0.05, 0.6, 0.03], facecolor="lightgoldenrodyellow")
+slider_distance = Slider(ax_distance, "Distance par Piquet (m)", 1, 10, valinit=distance_par_piquet)
 
 # Animation pour la simulation
 def update(frame):
-    global distance_parcourue, vitesse_m_s, compteur_piquets, latence_counter, start_time
-    
-    # Mettre à jour la vitesse de déplacement en fonction du curseur
+    global distance_parcourue, vitesse_m_s, compteur_piquets, latence_counter, start_time, distance_par_piquet
+
+    # Mettre à jour les paramètres à partir des sliders
     vitesse_m_s = slider_vitesse.val
-    
+    distance_par_piquet = slider_distance.val
+
     # Si la latence est active, ne pas avancer le cercle
     if latence_counter > 0:
         latence_counter -= 1  # Compter down la latence
         elapsed_time = time.time() - start_time  # Temps écoulé en secondes
-        remaining_time = 20 - elapsed_time  # Temps restant de la latence
         text_piquet.set_text("Latence en cours...")
         return progress, text_piquet, text_piquets_total
-    
+
     # Calcul de la distance parcourue en fonction du temps et de la vitesse
     distance_parcourue += vitesse_m_s * 0.05  # Incrément par frame (0.05 est l'intervalle en secondes)
-    
-    # Si la distance parcourue atteint ou dépasse la circonférence de la roue (1 tour complet)
-    if distance_parcourue >= circumference_roue:
-        distance_parcourue -= circumference_roue  # Réinitialiser la distance parcourue pour un nouveau tour
-        latence_counter = 400  # 400 frames de latence, correspondant à 20 secondes (si intervalle = 50ms)
-        start_time = time.time()  # Réinitialiser le chronomètre de la latence
-        compteur_piquets=compteur_piquets+1
-        
+
     # Mise à jour du compteur de piquets
     distance_parcourue = update_compteur(distance_parcourue, distance_par_piquet)
-    
+
     # Mise à jour du cercle de progression (représente un tour de roue)
     theta = np.linspace(0, 2 * np.pi * (distance_parcourue / circumference_roue), 100)
     progress.set_data(np.cos(theta), np.sin(theta))
-    
+
     # Mise à jour du texte pour le piquet
     if piquet_pose:
         text_piquet.set_text("Piquet posé!")
     else:
         text_piquet.set_text("")
-    
+
     # Mise à jour du texte pour le compteur de piquets
-    text_piquets_total.set_text(f"Piquets posés: {compteur_piquets}")  # Affichage du compteur de piquets
-    
+    text_piquets_total.set_text(f"Piquets posés: {compteur_piquets}")
+
     return progress, text_piquet, text_piquets_total
 
 # Animation avec Matplotlib
