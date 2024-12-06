@@ -1,0 +1,38 @@
+import tkinter as tk
+import random
+import math
+
+# Classe pour gérer l'interface graphique et simuler l'inclinaison
+class GyroscopeApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Inclinaison Simulée de la Machine")
+        self.root.geometry("400x300")
+
+        # Labels pour afficher les angles d'inclinaison
+        self.x_angle_label = tk.Label(root, text="Inclinaison X: 0", font=("Arial", 14))
+        self.x_angle_label.pack(pady=20)
+
+        self.y_angle_label = tk.Label(root, text="Inclinaison Y: 0", font=("Arial", 14))
+        self.y_angle_label.pack(pady=20)
+
+        # Mise à jour des données en temps réel
+        self.update_inclination()
+
+    def update_inclination(self):
+        # Simuler les valeurs d'inclinaison (valeurs aléatoires entre -30 et 30 degrés)
+        angle_x = random.uniform(-30, 30)
+        angle_y = random.uniform(-30, 30)
+
+        # Mettre à jour les labels avec les nouvelles valeurs simulées
+        self.x_angle_label.config(text=f"Inclinaison X: {angle_x:.2f}°")
+        self.y_angle_label.config(text=f"Inclinaison Y: {angle_y:.2f}°")
+
+        # Appeler cette méthode toutes les 100ms pour une mise à jour en temps réel
+        self.root.after(100, self.update_inclination)
+
+# Initialisation de l'interface graphique
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = GyroscopeApp(root)
+    root.mainloop()
