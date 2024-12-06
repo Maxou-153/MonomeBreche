@@ -1,0 +1,29 @@
+import tkinter as tk
+
+class PiquetCounterApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Compteur de Piquets")
+        self.root.geometry("300x200")
+
+        # Initialisation du compteur de piquets
+        self.piquet_count = 0
+
+        # Label pour afficher le nombre de piquets
+        self.count_label = tk.Label(root, text=f"Piquets insérés: {self.piquet_count}", font=("Arial", 14))
+        self.count_label.pack(pady=20)
+
+        # Bouton pour incrémenter le compteur
+        self.increment_button = tk.Button(root, text="Ajouter un piquet", font=("Arial", 12), bg="green", fg="white", command=self.increment_piquet)
+        self.increment_button.pack(pady=10)
+
+    def increment_piquet(self):
+        """Incrémente le nombre de piquets et met à jour l'affichage."""
+        self.piquet_count += 1
+        self.count_label.config(text=f"Piquets insérés: {self.piquet_count}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PiquetCounterApp(root)
+    root.mainloop()
+
