@@ -1,0 +1,39 @@
+import tkinter as tk
+from tkinter import messagebox
+
+class TariereController:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Contrôle de Fin de Course - Tarière")
+
+        # Initialiser l'état de la tarière
+        self.tariere_active = False
+
+        # Créer un bouton pour contrôler la tarière
+        self.control_button = tk.Button(
+            self.root, text="Activer la tarière", bg="green", fg="white", font=("Arial", 16),
+            command=self.toggle_tariere
+        )
+        self.control_button.pack(pady=20)
+
+        # Afficher l'état de la tarière
+        self.status_label = tk.Label(
+            self.root, text="État de la tarière: Désactivée", font=("Arial", 14)
+        )
+        self.status_label.pack(pady=10)
+
+    def toggle_tariere(self):
+        # Basculer l'état de la tarière
+        self.tariere_active = not self.tariere_active
+
+        if self.tariere_active:
+            self.control_button.config(text="Désactiver la tarière", bg="red")
+            self.status_label.config(text="État de la tarière: Activée", fg="green")
+        else:
+            self.control_button.config(text="Activer la tarière", bg="green")
+            self.status_label.config(text="État de la tarière: Désactivée", fg="red")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = TariereController(root)
+    root.mainloop()
