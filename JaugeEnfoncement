@@ -1,0 +1,70 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import time
+
+class JaugeEnfoncement:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Jauge d'enfoncement")
+
+        # Variables pour la jauge
+        self.enfoncement_valeur = tk.DoubleVar(value=0.0)
+
+        # Étiquettes
+        self.label_title = tk.Label(self.root, text="Simulation de l'enfoncement", font=("Arial", 16))
+        self.label_title.pack(pady=10)
+
+        self.label_valeur = tk.Label(
+            self.root, text="Valeur actuelle: 0.0 m", font=("Arial", 14)
+        )
+        self.label_valeur.pack(pady=10)
+
+        # Jauge de progression
+        self.progress = ttk.Progressbar(
+            self.root, orient="horizontal", length=300, mode="determinate",
+            maximum=1.0, variable=self.enfoncement_valeur
+        )
+        self.progress.pack(pady=20)
+
+        # Bouton pour démarrer l'enfoncement automatique
+        self.start_bouton = tk.Button(
+            self.root, text="Démarrer", command=self.start_auto_enfoncement, font=("Arial", 14), bg="blue", fg="white"
+        )
+        self.start_bouton.pack(pady=10)
+
+        # Bouton de réinitialisation
+        self.reset_bouton = tk.Button(
+            self.root, text="Réinitialiser", command=self.reset_enfoncement, font=("Arial", 14), bg="red", fg="white"
+        )
+        self.reset_bouton.pack(pady=10)
+
+    def auto_enfoncement(self):
+        # Enfoncement progressif
+        for i in range(101):  # Diviser l'enfoncement en 100 étapes
+            self.enfoncement_valeur.set(i / 100)
+            self.label_valeur.config(text=f"Valeur actuelle: {i / 100:.2f} m")
+            self.root.update()
+            time.sleep(0.05)  # Pause pour simuler l'animation
+
+        # Message lorsque l'enfoncement atteint 1 mètre
+        messagebox.showinfo("Piquet enfoncé", "Le Trou est d'1 mètre.")
+
+        # Descente progressive à 0 mètre
+        for i in range(100, -1, -1):  # Descente en 100 étapes
+            self.enfoncement_valeur.set(i / 100)
+            self.label_valeur.config(text=f"Valeur actuelle: {i / 100:.2f} m")
+            self.root.update()
+            time.sleep(0.05)
+
+    def start_auto_enfoncement(self):
+        self.auto_enfoncement()
+
+    def reset_enfoncement(self):
+        # Réinitialise la jauge
+        self.enfoncement_valeur.set(0.0)
+        self.label_valeur.config(text="Valeur actuelle: 0.0 m")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = JaugeEnfoncement(root)
+    root.mainloop()
