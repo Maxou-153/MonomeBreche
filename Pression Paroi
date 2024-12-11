@@ -1,0 +1,76 @@
+import tkinter as tk
+from tkinter import ttk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import random
+import time
+
+# Liste pour stocker les valeurs de pression au fil du temps
+time_values = []
+pressure_values = []
+
+# Fonction pour mettre à jour la pression, l'affichage et le graphique
+def update_pressure(val):
+    # Convertir la valeur du potentiomètre (0-100) en pression (0-3 bars)
+    pression = float(val) * 3.0 / 100.0
+    
+    # Mettre à jour le label de la pression affichée en temps réel
+    label_pressure.config(text=f"Pression actuelle : {pression:.2f} bars")
+    
+    # Ajouter la nouvelle pression et le temps actuel
+    current_time = time.time()  # Temps actuel en secondes
+    time_values.append(current_time)
+    pressure_values.append(pression)
+    
+    # Limiter les valeurs pour afficher uniquement les 60 dernières secondes (pour un balayage sur 1 minute)
+    if len(time_values) > 60:
+        time_values.pop(0)
+        pressure_values.pop(0)
+    
+    # Mettre à jour le graphique
+    ax.clear()
+    ax.plot(time_values, pressure_values, color='blue', lw=2)
+    ax.set_ylim(0, 3)  # Plage de pression de 0 à 3 bars
+    ax.set_xlabel("Temps (secondes)")
+    ax.set_ylabel("Pression (bars)")
+    ax.set_title("Évolution de la Pression Sangle Trémie")
+    canvas.draw()
+
+# Fonction pour simuler le changement automatique du potentiomètre
+def auto_change_potentiometer():
+    # Simuler la valeur du potentiomètre de manière aléatoire (0-100)
+    new_value = random.randint(0, 100)
+    
+    # Mettre à jour la pression et le graphique avec la nouvelle valeur du potentiomètre
+    update_pressure(new_value)
+    
+    # Relancer la fonction après un délai pour créer un effet de changement automatique
+    root.after(1000, auto_change_potentiometer)  # 1 seconde pour mettre à jour la pression
+
+# Création de la fenêtre principale
+root = tk.Tk()
+root.title("Simulateur de Pression - Sangle Trémie")
+
+
+# Label pour afficher la pression
+label_pressure = tk.Label(root, text="Pression actuelle : 0.00 bars", font=('Helvetica', 14))
+label_pressure.pack(pady=10)
+
+# Création du graphique avec Matplotlib
+fig, ax = plt.subplots(figsize=(5, 3))
+ax.set_ylim(0, 3)
+ax.set_xlim(0, 60)  # Afficher les 60 dernières secondes
+ax.set_title("Évolution de la Pression Sangle Trémie")
+ax.set_xlabel("Temps (secondes)")
+ax.set_ylabel("Pression (bars)")
+
+# Affichage du graphique dans la fenêtre Tkinter
+canvas = FigureCanvasTkAgg(fig, master=root)
+canvas.get_tk_widget().pack(pady=20)
+canvas.draw()
+
+# Démarrer la fonction qui change automatiquement la valeur du potentiomètre
+auto_change_potentiometer()
+
+# Lancer l'application
+root.mainloop()
