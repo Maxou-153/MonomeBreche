@@ -1,1 +1,107 @@
-print ("hello LeRoiDeLaMelo")
+import random
+
+# Classe principale Capteur
+class Capteur:
+    def __init__(self, nom, unite):
+        self.nom = nom
+        self.unite = unite
+
+    def lire_valeur(self, debit_huile=None, prise_force_mode=None):
+        raise NotImplementedError("Cette méthode doit être surchargée.")
+
+# Classe pour les capteurs avec des valeurs continues
+class CapteurContinu(Capteur):
+    def __init__(self, nom, unite, min_valeur, max_valeur):
+        super().__init__(nom, unite)
+        self.min_valeur = min_valeur
+        self.max_valeur = max_valeur
+
+    def lire_valeur(self, debit_huile=None, prise_force_mode=None):
+        return round(random.uniform(self.min_valeur, self.max_valeur), 2)
+
+# Classe pour les capteurs TOR (Tout Ou Rien)
+class CapteurTOR(Capteur):
+    def __init__(self, nom):
+        super().__init__(nom, "TOR")
+
+    def lire_valeur(self, debit_huile=None, prise_force_mode=None):
+        return random.choice([True, False])
+
+# Spécificité des capteurs à lois entrée-sortie
+class DebithuileCapteur(CapteurContinu):
+    def lire_valeur(self, debit_huile=None, prise_force_mode=None):
+        return debit_huile
+
+class PressionHuileCapteur(CapteurContinu):
+    def lire_valeur(self, debit_huile=None, prise_force_mode=None):
+        if debit_huile is None:
+            return super().lire_valeur()
+        pression = 1.3 + (debit_huile - 500) * (1.8 - 1.3) / (3000 - 500)
+        return round(pression, 2)
+
+class VitessePriseForceCapteur(CapteurContinu):
+    def lire_valeur(self, debit_huile=None, prise_force_mode=None):
+        if prise_force_mode == 1:
+            return random.randint(1500, 1800)
+        elif prise_force_mode == 2:
+            return random.randint(1800, 2100)
+        elif prise_force_mode == 3:
+            return random.randint(2100, 2400)
+        elif prise_force_mode == 4:
+            return random.randint(2400, 2500)
+        return 0
+
+
+class VitesseRotationTariereCapteur(CapteurContinu):
+    def lire_valeur(self, debit_huile=None, prise_force_mode=None):
+        if prise_force_mode == 4:
+            return 300  # Rotation uniquement en mode 4
+        return 0  # Pas de rotation dans les autres modes
+
+class VitesseEnfoncementTariereCapteur(CapteurContinu):
+    def lire_valeur(self, debit_huile=None, prise_force_mode=None):
+        if prise_force_mode != 4:  # La tarière ne descend que si le mode 4 est actif
+            return 0
+        if debit_huile is None:
+            return super().lire_valeur()
+        vitesse = 20 + (debit_huile - 500) * (200 - 20) / (3000 - 500)
+        return round(vitesse, 2)
+
+# Création des capteurs avec lois
+capteurs = [
+    VitessePriseForceCapteur("Vitesse de la prise de force", "tr/min", 0, 540),
+    DebithuileCapteur("Débit d'huile", "m3/s", 500, 3000),
+    PressionHuileCapteur("Pression d'huile", "Bar", 0, 250),
+    CapteurContinu("Compte tour de roue pour espacement piquets", "tr", 0, 1000),
+    CapteurContinu("Présence de piquets dans le guide", "Unité", 0, 50),
+    CapteurContinu("Compteur de piquets quand chargement", "Unité", 0, 100),
+    CapteurContinu("Gyroscope/Accéléromètre", "°", -90, 90),
+    CapteurTOR("Fin de course pour guide"),
+    CapteurTOR("Fin de course pour tarrière Z/X"),
+    VitesseRotationTariereCapteur("Vitesse rotation tarière", "tr/min", 0, 1000),
+    VitesseEnfoncementTariereCapteur("Vitesse enfoncement tarière (pression)", "mm/s", 0, 10000),
+    CapteurContinu("Jauge dans le guide pour enfoncement", "cm", 0, 200),
+    CapteurContinu("Pression sangle trémie", "Bar", 0, 10),
+    CapteurContinu("Jauge capacité trémie", "%", 0, 100),
+]
+
+# Simulation pour lire la valeur des capteurs
+def simuler_capteurs(debit_huile, prise_force_mode):
+    for capteur in capteurs:
+        valeur = capteur.lire_valeur(debit_huile=debit_huile, prise_force_mode=prise_force_mode)
+        print(f"{capteur.nom} : {valeur} {capteur.unite}")
+
+# Entrées utilisateur
+debit_huile = float(input("Entrez le débit d'huile (entre 500 et 3000) : "))
+prise_force_mode = int(input("Entrez le mode de la prise de force (1 à 4) : "))
+
+# Vérification des plages
+if not (500 <= debit_huile <= 3000):
+    print("Le débit d'huile doit être entre 500 et 3000.")
+    exit()
+if prise_force_mode not in [1, 2, 3, 4]:
+    print("Le mode de la prise de force doit être entre 1 et 4.")
+    exit()
+
+# Exécuter la simulation
+simuler_capteurs(debit_huile, prise_force_mode)
