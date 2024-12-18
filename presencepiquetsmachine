@@ -4,7 +4,7 @@ class PiquetCounterApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Compteur de Piquets")
-        self.root.geometry("300x200")
+        self.root.geometry("300x250")
 
         # Initialisation du compteur de piquets
         self.piquet_count = 0
@@ -13,17 +13,41 @@ class PiquetCounterApp:
         self.count_label = tk.Label(root, text=f"Piquets insérés: {self.piquet_count}", font=("Arial", 14))
         self.count_label.pack(pady=20)
 
-        # Bouton pour incrémenter le compteur
+        # Bouton pour incrémenter le compteur d'un piquet
         self.increment_button = tk.Button(root, text="Ajouter un piquet", font=("Arial", 12), bg="green", fg="white", command=self.increment_piquet)
         self.increment_button.pack(pady=10)
 
+        # Champ de saisie pour entrer le nombre de piquets à ajouter
+        self.entry_label = tk.Label(root, text="Entrez le nombre de piquets à ajouter:", font=("Arial", 10))
+        self.entry_label.pack(pady=5)
+
+        self.piquets_entry = tk.Entry(root, font=("Arial", 12))
+        self.piquets_entry.pack(pady=5)
+
+        # Bouton pour ajouter le nombre de piquets saisi
+        self.add_custom_button = tk.Button(root, text="Ajouter", font=("Arial", 12), bg="blue", fg="white", command=self.add_custom_piquets)
+        self.add_custom_button.pack(pady=10)
+
     def increment_piquet(self):
-        """Incrémente le nombre de piquets et met à jour l'affichage."""
+        """Incrémente le nombre de piquets de 1 et met à jour l'affichage."""
         self.piquet_count += 1
         self.count_label.config(text=f"Piquets insérés: {self.piquet_count}")
+
+    def add_custom_piquets(self):
+        """Ajoute le nombre de piquets saisi et met à jour l'affichage."""
+        try:
+            # Récupère la valeur saisie et l'ajoute au compteur
+            custom_count = int(self.piquets_entry.get())
+            if custom_count > 0:
+                self.piquet_count += custom_count
+                self.count_label.config(text=f"Piquets insérés: {self.piquet_count}")
+            else:
+                self.count_label.config(text="Veuillez entrer un nombre positif.")
+        except ValueError:
+            # Si la saisie n'est pas un entier, afficher un message d'erreur
+            self.count_label.config(text="Veuillez entrer un nombre valide.")
 
 if __name__ == "__main__":
     root = tk.Tk()
     app = PiquetCounterApp(root)
     root.mainloop()
-
