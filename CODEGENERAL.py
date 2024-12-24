@@ -44,8 +44,38 @@ class InterfacePrincipale:
         CompteurPiquets(frame)
 
     def init_verin_tab(self, frame):
-        label = tk.Label(frame, text="Contrôle des Vérins", font=("Arial", 16))
-        label.pack(pady=10)
+        VerinController(frame)
+
+class VerinController:
+    def __init__(self, frame):
+        self.frame = frame
+
+        # Initialiser l'état du vérin
+        self.verin_active = False
+
+        # Créer un bouton pour contrôler le vérin
+        self.control_button = tk.Button(
+            self.frame, text="Démarrer le vérin", bg="green", fg="white", font=("Arial", 16),
+            command=self.toggle_verin
+        )
+        self.control_button.pack(pady=20)
+
+        # Afficher l'état du vérin
+        self.status_label = tk.Label(
+            self.frame, text="État du vérin: Arrêté", font=("Arial", 14)
+        )
+        self.status_label.pack(pady=10)
+
+    def toggle_verin(self):
+        # Basculer l'état du vérin
+        self.verin_active = not self.verin_active
+
+        if self.verin_active:
+            self.control_button.config(text="Arrêter le vérin", bg="red")
+            self.status_label.config(text="État du vérin: En marche", fg="green")
+        else:
+            self.control_button.config(text="Démarrer le vérin", bg="green")
+            self.status_label.config(text="État du vérin: Arrêté", fg="red")
 
 # Classe pour gérer l'interface graphique liée à la pression des parois
 class Pressure:
